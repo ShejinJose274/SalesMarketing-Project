@@ -1,0 +1,128 @@
+<!-- 
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">Organization / Team Details</p>
+    <h2>{{ team?.teamname || 'Marketing Team' }}</h2>
+    <p class="muted">
+      Team information, leadership and salesman assignments.
+    </p>
+  </div>
+
+  <a
+    ejs-button
+    cssClass="e-outline"
+    routerLink="/marketing-team">
+    Back to Marketing Teams
+  </a>
+</section>
+
+@if (loading) {
+  <div class="loading">Loading team details…</div>
+} @else if (error) {
+  <div class="error">{{ error }}</div>
+} @else if (team) {
+
+  <section class="team-overview">
+    <div class="overview-heading">
+      <div>
+        <p class="eyebrow">TEAM OVERVIEW</p>
+        <h3>{{ team.teamname }}</h3>
+        <span>{{ team.teamcode }}</span>
+      </div>
+
+      <span
+        class="status"
+        [class.inactive]="team.status === 2">
+        {{ team.status === 1 ? 'Active' : 'Inactive' }}
+      </span>
+    </div>
+
+    <div class="overview-stats">
+      <div>
+        <span>Team Leader</span>
+        <strong>{{ team.teamleadername || 'Not assigned' }}</strong>
+      </div>
+
+      <div>
+        <span>Members</span>
+        <strong>{{ team.members.length }}</strong>
+      </div>
+
+      <div>
+        <span>Total Target</span>
+        <strong>{{ totalTarget | number:'1.2-2' }}</strong>
+      </div>
+    </div>
+
+    <div class="description">
+      <h4>Description</h4>
+      <p>{{ team.description || 'No description provided.' }}</p>
+    </div>
+  </section>
+
+  <section class="members-section">
+    <div class="section-heading">
+      <div>
+        <h3>Team Members</h3>
+        <p class="muted">
+          {{ team.members.length }} assigned salesmen
+        </p>
+      </div>
+    </div>
+
+    <ejs-grid
+      [dataSource]="team.members"
+      gridLines="Horizontal"
+      [allowSorting]="true"
+      [allowPaging]="team.members.length > 10"
+      [pageSettings]="{ pageSize: 10 }">
+
+      <e-columns>
+        <e-column
+          field="salesmanname"
+          headerText="Salesman"
+          width="210">
+        </e-column>
+
+        <e-column
+          headerText="Role"
+          width="170">
+          <ng-template #template let-member>
+            @if (member.salesmanid === team.teamleaderid) {
+              <span class="leader-badge">Team Leader</span>
+            } @else {
+              {{ roleName(member.role) }}
+            }
+          </ng-template>
+        </e-column>
+
+        <e-column
+          field="targetamount"
+          headerText="Target Amount"
+          width="150"
+          textAlign="Right">
+        </e-column>
+
+        <e-column
+          headerText="Status"
+          width="120">
+          <ng-template #template let-member>
+            <span
+              class="status"
+              [class.inactive]="member.status === 2">
+              {{ member.status === 1 ? 'Active' : 'Inactive' }}
+            </span>
+          </ng-template>
+        </e-column>
+      </e-columns>
+    </ejs-grid>
+  </section>
+} -->
+
+
+
+
+<div class="redirect-message">
+  Opening Marketing Teams...
+</div>
+

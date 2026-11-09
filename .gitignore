@@ -1,0 +1,63 @@
+﻿
+# Visual Studio
+
+.vs/
+
+**/bin/
+
+**/obj/
+
+*.user
+
+*.suo
+
+*.cache
+ 
+# Angular / Node.js
+
+**/node_modules/
+
+**/dist/
+
+**/.angular/
+
+**/coverage/
+
+npm-debug.log*
+ 
+# Environment files and local secrets
+
+.env
+
+.env.*
+
+!.env.example
+
+**/appsettings.Development.json
+
+**/appsettings.Local.json
+
+**/secrets.json
+ 
+# Certificates and private keys
+
+*.pfx
+
+*.p12
+
+*.pem
+
+*.key
+ 
+# Test results and logs
+
+**/TestResults/
+
+*.log
+ 
+# Operating system files
+
+.DS_Store
+
+Thumbs.db
+

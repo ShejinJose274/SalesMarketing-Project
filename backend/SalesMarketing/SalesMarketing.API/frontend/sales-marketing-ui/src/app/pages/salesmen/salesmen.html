@@ -1,0 +1,663 @@
+
+<!-- ==========================================
+     PAGE HEADING
+========================================== -->
+
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">People</p>
+    <h2>Salesman Master</h2>
+    <p class="muted">
+      Maintain your sales force and availability.
+    </p>
+  </div>
+
+  @if (auth.hasRole('SalesManagerAdmin')) {
+    <button
+      ejs-button
+      type="button"
+      cssClass="e-primary"
+      iconCss="e-icons e-plus"
+      (click)="openCreate()">
+      New Salesman
+    </button>
+  }
+</section>
+
+<!-- ==========================================
+     CUSTOM TOAST NOTIFICATIONS
+========================================== -->
+
+@if (toastVisible) {
+  <div
+    class="app-toast"
+    [class.toast-success]="toastType === 'success'"
+    [class.toast-error]="toastType === 'error'"
+    role="status"
+    aria-live="polite">
+
+    <div class="toast-content">
+      <strong>
+        {{ toastType === 'success' ? 'Success' : 'Error' }}
+      </strong>
+
+      <span>{{ toastMessage }}</span>
+    </div>
+
+    <button
+      type="button"
+      class="toast-close"
+      aria-label="Close notification"
+      (click)="dismissToast()">
+      ×
+    </button>
+  </div>
+}
+
+<!-- ==========================================
+     SEARCH AND FILTER TOOLBAR
+========================================== -->
+
+<div class="toolbar">
+
+  <ejs-textbox
+    [value]="search"
+    placeholder="Search code, name or mobile"
+    [showClearButton]="true"
+    (input)="onSearchChange($event.value)"
+    (change)="onSearchChange($event.value)"
+    width="300px">
+  </ejs-textbox>
+
+  <ejs-dropdownlist
+    [dataSource]="[
+      { label: 'All salesmen', value: 'all' },
+      { label: 'Active', value: '1' },
+      { label: 'Inactive', value: '2' }
+    ]"
+    [fields]="{ text: 'label', value: 'value' }"
+    [(value)]="filter"
+    (change)="onFilterChange()"
+    width="170px">
+  </ejs-dropdownlist>
+
+  <span class="count">
+    {{ salesmen.length }} records
+  </span>
+
+</div>
+
+<!-- ==========================================
+     LOADING STATE
+========================================== -->
+
+@if (loading) {
+
+  <div class="loading">
+    Loading salesmen…
+  </div>
+
+}
+
+  <div class="salesman-grid-wrapper">
+
+    <ejs-grid
+      #salesmenGrid
+      [dataSource]="salesmen"
+      [allowSorting]="true"
+      [allowPaging]="true"
+      [pageSettings]="pageSettings"
+      gridLines="Horizontal">
+
+      <!-- ======================================
+           INLINE EDIT DETAIL TEMPLATE
+      ======================================= -->
+
+      <ng-template #detailTemplate let-person>
+
+        <div class="inline-edit-panel">
+
+          <div class="inline-edit-heading">
+
+            <div>
+              <h3>
+                Edit {{ person.salesmanname }}
+              </h3>
+
+              <p class="muted">
+                Update salesman information below.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              class="inline-close-button"
+              [disabled]="saving || confirming"
+              (click)="cancelInlineEdit()"
+              aria-label="Close edit form">
+              ×
+            </button>
+
+          </div>
+
+          <form
+            [formGroup]="salesmanForm"
+            (ngSubmit)="openConfirmation('save')">
+
+            <div class="form-grid">
+
+              <!-- SALESMAN CODE -->
+              <label>
+                Salesman code
+
+                <ejs-textbox
+                  name="editCode"
+                  formControlName="salesmancode"
+                  [readonly]="true"
+                  floatLabelType="Auto">
+                </ejs-textbox>
+
+                @if (
+                  salesmanForm.controls.salesmancode.touched &&
+                  salesmanForm.controls.salesmancode.invalid
+                ) {
+                  <small class="field-error">
+                    Salesman code is invalid.
+                  </small>
+                }
+              </label>
+
+              <!-- FULL NAME -->
+              <label>
+                Full name
+
+                <ejs-textbox
+                  name="editName"
+                  formControlName="salesmanname"
+                  required
+                  maxlength="100"
+                  floatLabelType="Auto">
+                </ejs-textbox>
+
+                @if (
+                  salesmanForm.controls.salesmanname.touched &&
+                  salesmanForm.controls.salesmanname.invalid
+                ) {
+                  <small class="field-error">
+                    Name is required.
+                  </small>
+                }
+              </label>
+
+              <!-- MOBILE NUMBER -->
+              <label>
+                Mobile number
+
+                <ejs-textbox
+                  name="editMobile"
+                  formControlName="mobileno"
+                  type="tel"
+                  floatLabelType="Auto">
+                </ejs-textbox>
+
+                @if (
+                  salesmanForm.controls.mobileno.touched &&
+                  salesmanForm.controls.mobileno.invalid
+                ) {
+                  <small class="field-error">
+                    Use 7–15 digits.
+                  </small>
+                }
+              </label>
+
+              <!-- EMAIL -->
+              <label>
+                Email
+
+                <ejs-textbox
+                  name="editEmail"
+                  formControlName="email"
+                  type="email"
+                  floatLabelType="Auto">
+                </ejs-textbox>
+
+                @if (
+                  salesmanForm.controls.email.touched &&
+                  salesmanForm.controls.email.invalid
+                ) {
+                  <small class="field-error">
+                    Enter a valid email address.
+                  </small>
+                }
+              </label>
+
+              <!-- JOINING DATE -->
+              <label>
+                Joining date
+
+                <ejs-datepicker
+                  name="editJoining"
+                  formControlName="joiningDate"
+                  format="dd-MMM-yyyy"
+                  floatLabelType="Auto">
+                </ejs-datepicker>
+              </label>
+
+              <!-- STATUS -->
+              <label>
+                Status
+
+                <ejs-dropdownlist
+                  name="editStatus"
+                  [dataSource]="[
+                    { text: 'Active', value: 1 },
+                    { text: 'Inactive', value: 2 }
+                  ]"
+                  [fields]="{ text: 'text', value: 'value' }"
+                  formControlName="status">
+                </ejs-dropdownlist>
+              </label>
+
+            </div>
+
+            <div class="modal-actions">
+
+              <button
+                type="button"
+                class="form-cancel-button"
+                [disabled]="saving || confirming"
+                (click)="cancelInlineEdit()">
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                class="form-save-button"
+                [disabled]="saving || confirming">
+
+                {{ saving ? 'Saving…' : 'Save Changes' }}
+
+              </button>
+
+            </div>
+
+          </form>
+
+        </div>
+
+      </ng-template>
+
+      <!-- ======================================
+           GRID COLUMNS
+      ======================================= -->
+
+      <e-columns>
+
+        <!-- SALESMAN NAME -->
+        <e-column
+          field="salesmanname"
+          headerText="Salesman Name"
+          width="185">
+
+          <ng-template #template let-person>
+            <span class="link">
+              {{ person.salesmanname }}
+            </span>
+
+            <small>
+              {{ person.salesmancode }}
+            </small>
+          </ng-template>
+
+        </e-column>
+
+        <!-- MOBILE NUMBER -->
+        <e-column
+          field="mobileno"
+          headerText="Mobile No"
+          width="125">
+
+          <ng-template #template let-person>
+            {{ person.mobileno || '—' }}
+          </ng-template>
+
+        </e-column>
+
+        <!-- EMAIL -->
+        <e-column
+          field="email"
+          headerText="Email"
+          width="185">
+
+          <ng-template #template let-person>
+            <span
+              class="email-cell"
+              [title]="person.email || ''">
+              {{ person.email || '—' }}
+            </span>
+          </ng-template>
+
+        </e-column>
+
+        <!-- JOINING DATE -->
+        <e-column
+          field="joiningdate"
+          headerText="Joining Date"
+          width="120">
+        </e-column>
+
+        <!-- STATUS -->
+        <e-column
+          field="status"
+          headerText="Status"
+          width="95">
+
+          <ng-template #template let-person>
+            <span
+              class="status"
+              [class.inactive]="person.status === 2">
+
+              {{
+                person.status === 1
+                  ? 'Active'
+                  : 'Inactive'
+              }}
+
+            </span>
+          </ng-template>
+
+        </e-column>
+
+        <!-- ACTION BUTTONS -->
+        <e-column
+          headerText="Actions"
+          width="315"
+          [allowSorting]="false">
+
+          <ng-template #template let-person>
+
+            @if (auth.hasRole('SalesManagerAdmin')) {
+
+              <div class="salesman-actions">
+
+                <!-- EDIT -->
+                <button
+                  type="button"
+                  class="action-button action-edit"
+                  [disabled]="saving || confirming"
+                  (click)="expandEditRow(person)">
+
+                  {{
+                    inlineEditingId === person.id
+                      ? 'Close'
+                      : 'Edit'
+                  }}
+
+                </button>
+
+                <!-- ACTIVATE / DEACTIVATE -->
+                <button
+                  type="button"
+                  class="action-button action-status"
+                  [disabled]="saving || confirming"
+                  (click)="toggleStatus(person)">
+
+                  {{
+                    person.status === 1
+                      ? 'Deactivate'
+                      : 'Activate'
+                  }}
+
+                </button>
+
+                <!-- DELETE -->
+                <button
+                  type="button"
+                  class="action-button action-delete"
+                  [disabled]="saving || confirming"
+                  (click)="remove(person)">
+                  Delete
+                </button>
+
+              </div>
+
+            }
+
+          </ng-template>
+
+        </e-column>
+
+      </e-columns>
+
+    </ejs-grid>
+
+  </div>
+
+
+
+<!-- ==========================================
+     CREATE SALESMAN DIALOG
+========================================== -->
+
+<ejs-dialog
+  [visible]="formOpen"
+  [showCloseIcon]="!saving && !confirmationOpen"
+  [isModal]="true"
+  [closeOnEscape]="!saving && !confirmationOpen"
+  width="720px"
+  header="Add Salesman"
+  (close)="closeForm()">
+
+  <ng-template #content>
+
+    <form
+      [formGroup]="salesmanForm"
+      (ngSubmit)="openConfirmation('save')">
+
+      <div class="form-grid">
+
+        <!-- CODE -->
+        <label>
+          Salesman code
+
+          <ejs-textbox
+            name="code"
+            formControlName="salesmancode"
+            required
+            maxlength="20"
+            floatLabelType="Auto">
+          </ejs-textbox>
+
+          @if (
+            salesmanForm.controls.salesmancode.touched &&
+            salesmanForm.controls.salesmancode.invalid
+          ) {
+            <small class="field-error">
+              Code is required and must contain
+              only letters and numbers.
+            </small>
+          }
+        </label>
+
+        <!-- NAME -->
+        <label>
+          Full name
+
+          <ejs-textbox
+            name="name"
+            formControlName="salesmanname"
+            required
+            maxlength="100"
+            floatLabelType="Auto">
+          </ejs-textbox>
+
+          @if (
+            salesmanForm.controls.salesmanname.touched &&
+            salesmanForm.controls.salesmanname.invalid
+          ) {
+            <small class="field-error">
+              Name is required.
+            </small>
+          }
+        </label>
+
+        <!-- MOBILE -->
+        <label>
+          Mobile number
+
+          <ejs-textbox
+            name="mobile"
+            formControlName="mobileno"
+            type="tel"
+            floatLabelType="Auto">
+          </ejs-textbox>
+
+          @if (
+            salesmanForm.controls.mobileno.touched &&
+            salesmanForm.controls.mobileno.invalid
+          ) {
+            <small class="field-error">
+              Use 7–15 digits.
+            </small>
+          }
+        </label>
+
+        <!-- EMAIL -->
+        <label>
+          Email
+
+          <ejs-textbox
+            name="email"
+            formControlName="email"
+            type="email"
+            floatLabelType="Auto">
+          </ejs-textbox>
+
+          @if (
+            salesmanForm.controls.email.touched &&
+            salesmanForm.controls.email.invalid
+          ) {
+            <small class="field-error">
+              Enter a valid email address.
+            </small>
+          }
+        </label>
+
+        <!-- JOINING DATE -->
+        <label>
+          Joining date
+
+          <ejs-datepicker
+            name="joining"
+            formControlName="joiningDate"
+            format="dd-MMM-yyyy"
+            floatLabelType="Auto">
+          </ejs-datepicker>
+        </label>
+
+        <!-- STATUS -->
+        <label>
+          Status
+
+          <ejs-dropdownlist
+            name="status"
+            [dataSource]="[
+              { text: 'Active', value: 1 },
+              { text: 'Inactive', value: 2 }
+            ]"
+            [fields]="{ text: 'text', value: 'value' }"
+            formControlName="status">
+          </ejs-dropdownlist>
+        </label>
+
+      </div>
+
+      <div class="modal-actions">
+
+        <button
+          type="button"
+          class="form-cancel-button"
+          [disabled]="saving || confirming"
+          (click)="closeForm()">
+          Cancel
+        </button>
+
+        <button
+          type="submit"
+          class="form-save-button"
+          [disabled]="saving || confirming">
+
+          {{ saving ? 'Saving…' : 'Save Salesman' }}
+
+        </button>
+
+      </div>
+
+    </form>
+
+  </ng-template>
+
+</ejs-dialog>
+
+<!-- ==========================================
+     SYNCFUSION CONFIRMATION DIALOG
+========================================== -->
+
+<ejs-dialog
+  #confirmationDialog
+  [visible]="confirmationOpen"
+  [isModal]="true"
+  [showCloseIcon]="!confirming"
+  [closeOnEscape]="!confirming"
+  [allowDragging]="false"
+  width="420px"
+  [header]="confirmationTitle"
+  target="body"
+  (close)="closeConfirmation()">
+
+  <ng-template #content>
+
+    <div class="confirmation-content">
+
+      <div
+        class="confirmation-icon"
+        [class.confirmation-danger]="confirmationDanger">
+        !
+      </div>
+
+      <p class="confirmation-message">
+        {{ confirmationMessage }}
+      </p>
+
+      <div class="confirmation-actions">
+
+        <button
+          type="button"
+          class="form-cancel-button"
+          [disabled]="confirming"
+          (click)="closeConfirmation()">
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          class="form-save-button"
+          [class.confirm-delete]="confirmationDanger"
+          [disabled]="confirming"
+          (click)="confirmAction()">
+
+          {{
+            confirming
+              ? 'Processing…'
+              : confirmationButtonText
+          }}
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </ng-template>
+
+</ejs-dialog>

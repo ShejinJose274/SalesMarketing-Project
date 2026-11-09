@@ -1,0 +1,785 @@
+
+<!-- PAGE HEADING -->
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">Organization / Masters</p>
+    <h2>Marketing Teams</h2>
+    <p class="muted">
+      Manage marketing teams, leaders, members and targets.
+    </p>
+  </div>
+
+  <!-- <button
+    ejs-button
+    type="button"
+    cssClass="e-primary"
+    (click)="openCreate()">
+    + New Team
+  </button> -->
+</section>
+
+<!-- SUMMARY -->
+<div class="team-summary">
+  <div class="summary-box">
+    <span>Active Teams</span>
+    <strong>{{ activeTeamCount }}</strong>
+  </div>
+
+  <div class="summary-box">
+    <span>Deactivated Teams</span>
+    <strong>{{ inactiveTeamCount }}</strong>
+  </div>
+
+  <div class="summary-box">
+    <span>Total Teams</span>
+    <strong>{{ totalTeams }}</strong>
+  </div>
+</div>
+
+<!-- MAIN GRID -->
+<section class="grid-panel">
+
+  <div class="grid-toolbar">
+    <!-- Native toolbar controls emit reliable DOM values; team table remains Syncfusion Grid. -->
+    <div class="search-box">
+      <input class="team-search-input" type="search" [value]="search"
+        (input)="onSearch($any($event.target).value)"
+        placeholder="Search team code or name..." aria-label="Search teams" />
+    </div>
+    <div class="status-filter">
+      <select class="team-status-select" [value]="selectedStatus ?? 0"
+        (change)="onStatusChange($any($event.target).value)" aria-label="Filter teams by status">
+        <option value="0">All teams</option>
+        <option value="1">Active teams</option>
+        <option value="2">Inactive teams</option>
+      </select>
+    </div>
+
+    <div class="toolbar-actions">
+      <span class="record-count">
+        {{ teams.length }} records
+      </span>
+
+      <button
+        ejs-button
+        type="button"
+        cssClass="e-primary"
+        (click)="openCreate()">
+        + New Team
+      </button>
+    </div>
+  </div>
+
+ @if (loading && teams.length === 0) {
+  <div class="loading">
+    Loading marketing teams...
+  </div>
+} 
+
+  <ejs-grid
+    #teamGrid
+    [dataSource]="teams"
+    [allowSorting]="true"
+    [allowPaging]="true"
+    [pageSettings]="pageSettings"
+    [enableHover]="true"
+    gridLines="Horizontal"
+    width="100%">
+
+    <e-columns>
+
+      <!-- TEAM CODE -->
+      <e-column
+        field="teamcode"
+        headerText="TEAM CODE"
+        width="135">
+
+        <ng-template #template let-team>
+          <span class="team-code">
+            {{ team.teamcode }}
+          </span>
+        </ng-template>
+      </e-column>
+
+      <!-- TEAM NAME -->
+      <e-column
+        field="teamname"
+        headerText="TEAM NAME"
+        width="240">
+
+        <ng-template #template let-team>
+          <button
+            type="button"
+            class="team-name-link"
+            (click)="openView(team)">
+            {{ team.teamname }}
+          </button>
+        </ng-template>
+      </e-column>
+
+      <!-- TEAM LEADER -->
+      <e-column
+        field="teamleadername"
+        headerText="TEAM LEADER"
+        width="200">
+      </e-column>
+
+      <!-- SALESMAN COUNT -->
+      <e-column
+        field="salesmancount"
+        headerText="NO. OF SALESMEN"
+        width="155"
+        textAlign="Center">
+      </e-column>
+
+      <!-- STATUS -->
+      <e-column
+        field="status"
+        headerText="STATUS"
+        width="125">
+
+        <ng-template #template let-team>
+          <span
+            class="status-badge"
+            [class.inactive]="team.status === 2">
+            <span class="status-dot"></span>
+            {{ team.status === 1 ? 'Active' : 'Inactive' }}
+          </span>
+        </ng-template>
+      </e-column>
+
+      <!-- ACTIONS -->
+      <e-column
+        headerText="ACTIONS"
+        width="280"
+        [allowSorting]="false">
+
+        <ng-template #template let-team>
+          <div class="grid-actions">
+
+            <button
+              type="button"
+              class="action-btn view-btn"
+              (click)="openView(team)">
+              View
+            </button>
+
+            <button
+              type="button"
+              class="action-btn edit-btn"
+              (click)="openEdit(team)">
+              Edit
+            </button>
+
+            <button
+              type="button"
+              class="action-btn status-btn"
+              [class.activate-btn]="team.status === 2"
+              [disabled]="processing"
+              (click)="requestStatus(team)">
+              {{
+                team.status === 1
+                  ? 'Deactivate'
+                  : 'Activate'
+              }}
+            </button>
+
+          </div>
+        </ng-template>
+      </e-column>
+
+    </e-columns>
+  </ejs-grid>
+
+  <div class="grid-footer">
+    <span>
+      Showing {{ teams.length }} loaded teams
+    </span>
+    <span>Marketing Team Master</span>
+  </div>
+
+</section>
+
+<!-- =====================================
+     VIEW TEAM MODAL
+===================================== -->
+<ejs-dialog
+  #viewDialog
+  [visible]="viewOpen"
+  [isModal]="true"
+  [showCloseIcon]="true"
+  [closeOnEscape]="true"
+  width="min(860px, 95vw)"
+  target="body"
+  cssClass="marketing-modal"
+  [header]="selectedTeam
+    ? 'Team Overview • ' + selectedTeam.teamcode
+    : 'Team Overview'"
+  (close)="closeView()">
+
+  <ng-template #content>
+
+    @if (viewLoading) {
+      <div class="loading">Loading team details...</div>
+    } @else if (selectedTeam) {
+
+      <div class="team-overview">
+
+        <p class="modal-subtitle">
+          {{ selectedTeam.teamname }}
+        </p>
+
+        <!-- DETAILS -->
+        <div class="overview-grid">
+
+          <div class="overview-field">
+            <span>TEAM CODE</span>
+            <strong>{{ selectedTeam.teamcode }}</strong>
+          </div>
+
+          <div class="overview-field">
+            <span>STATUS</span>
+            <div>
+              <span
+                class="status-badge"
+                [class.inactive]="selectedTeam.status === 2">
+                <span class="status-dot"></span>
+                {{
+                  selectedTeam.status === 1
+                    ? 'Active'
+                    : 'Inactive'
+                }}
+              </span>
+            </div>
+          </div>
+
+          <div class="overview-field">
+            <span>TEAM NAME</span>
+            <strong>{{ selectedTeam.teamname }}</strong>
+          </div>
+
+          <div class="overview-field">
+            <span>TEAM LEADER</span>
+            <strong>
+              {{ selectedTeam.teamleadername || 'Not assigned' }}
+            </strong>
+          </div>
+
+          <div class="overview-field wide">
+            <span>DESCRIPTION</span>
+            <strong>
+              {{
+                selectedTeam.description ||
+                'No description provided.'
+              }}
+            </strong>
+          </div>
+
+        </div>
+
+        <!-- MEMBERS -->
+        <div class="modal-section-heading">
+          <h3>
+            Assigned Members
+            ({{ selectedTeam.members.length }})
+          </h3>
+
+          <strong>
+            Total Target:
+            {{ viewTotalTarget | number:'1.2-2' }}
+          </strong>
+        </div>
+
+        <div class="member-table-wrap">
+          <table class="member-table">
+            <thead>
+              <tr>
+                <th>SALESMAN CODE</th>
+                <th>SALESMAN NAME</th>
+                <th>ROLE</th>
+                <th>TARGET AMOUNT</th>
+                <th>STATUS</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              @for (
+                member of selectedTeam.members;
+                track member.salesmanid
+              ) {
+                <tr>
+                  <td>#{{ member.salesmanid }}</td>
+                  <td>
+                    <strong>{{ member.salesmanname }}</strong>
+                  </td>
+                  <td>{{ roleName(member.role) }}</td>
+                  <td>
+                    {{ member.targetamount | number:'1.2-2' }}
+                  </td>
+                  <td>
+                    <span
+                      class="status-badge"
+                      [class.inactive]="member.status === 2">
+                      <span class="status-dot"></span>
+                      {{
+                        member.status === 1
+                          ? 'Active'
+                          : 'Inactive'
+                      }}
+                    </span>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="5" class="empty">
+                    No team members found.
+                  </td>
+                </tr>
+              }
+            </tbody>
+
+            <tfoot>
+              <tr>
+                <td colspan="3">
+                  <strong>Total Target</strong>
+                </td>
+                <td>
+                  <strong>
+                    {{ viewTotalTarget | number:'1.2-2' }}
+                  </strong>
+                </td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="secondary-btn"
+            (click)="closeView()">
+            Close
+          </button>
+
+          <button
+            type="button"
+            class="primary-btn"
+            (click)="openEdit(selectedTeam)">
+            Edit Team
+          </button>
+        </div>
+
+      </div>
+    }
+
+  </ng-template>
+</ejs-dialog>
+
+<!-- =====================================
+     CREATE / EDIT TEAM MODAL
+===================================== -->
+<ejs-dialog
+  #editDialog
+  [visible]="formOpen"
+  [isModal]="true"
+  [showCloseIcon]="!saving"
+  [closeOnEscape]="!saving"
+  width="min(1050px, 96vw)"
+  target="body"
+  cssClass="marketing-modal team-edit-dialog"
+  [header]="editingId === null
+    ? 'Create Marketing Team'
+    : 'Edit Marketing Team'"
+  (close)="closeForm()">
+
+  <ng-template #content>
+
+    <form (ngSubmit)="requestSave()">
+
+      <p class="modal-subtitle">
+        Configure team information and salesman assignments.
+      </p>
+
+      @if (formError) {
+        <div class="form-error">
+          {{ formError }}
+        </div>
+      }
+
+      <!-- BASIC INFORMATION -->
+      <div class="edit-form-grid">
+
+        <label>
+          Team Code *
+          <ejs-textbox
+            name="teamcode"
+            [(value)]="form.teamcode"
+            [enabled]="editingId === null"
+            maxlength="20"
+            placeholder="Enter team code">
+          </ejs-textbox>
+        </label>
+
+        <label>
+          Team Name *
+          <ejs-textbox
+            name="teamname"
+            [(value)]="form.teamname"
+            maxlength="100"
+            placeholder="Enter team name">
+          </ejs-textbox>
+        </label>
+
+        <label>
+          Team Leader *
+          <ejs-dropdownlist
+            name="teamleader"
+            [dataSource]="leaderOptions"
+            [fields]="{
+              text: 'name',
+              value: 'id'
+            }"
+            [value]="form.teamleaderid || null"
+            [allowFiltering]="true"
+            [enabled]="!membershipLocked"
+            (change)="setLeader($event.value)"
+            placeholder="Select team leader">
+          </ejs-dropdownlist>
+        </label>
+
+        <label>
+          Status
+          <ejs-dropdownlist
+            name="status"
+            [dataSource]="statusOptions"
+            [fields]="{
+              text: 'text',
+              value: 'value'
+            }"
+            [(value)]="form.status"
+            [enabled]="editingId === null">
+          </ejs-dropdownlist>
+        </label>
+
+        <label class="wide">
+          Description
+          <ejs-textbox
+            name="description"
+            [(value)]="form.description"
+            [multiline]="true"
+            maxlength="500"
+            placeholder="Enter team description">
+          </ejs-textbox>
+        </label>
+
+      </div>
+
+      <!-- MEMBERS HEADER -->
+      <div class="modal-section-heading">
+        <div>
+          <h3>
+            Team Members
+            ({{ form.members.length }})
+          </h3>
+          <p>
+            Add members, assign roles and update targets.
+          </p>
+        </div>
+      </div>
+
+      @if (membershipLocked) {
+        <div class="member-warning">This team is inactive. Activate the team before adding or removing members.</div>
+      } @else if (memberLimitReached) {
+        <div class="member-warning">Maximum 5 members reached (including the team leader). Remove a member to add another.</div>
+      }
+      <p class="member-capacity">Members: {{ form.members.length }} / {{ maxMembers }}</p>
+
+      <!-- ADD MEMBER AREA -->
+      <div class="add-member-panel">
+
+        <div class="add-member-title">
+          <strong>+ Add Member</strong>
+        </div>
+
+        <div class="add-member-fields">
+
+          <ejs-dropdownlist
+            name="newMember"
+            [dataSource]="selectableSalesmen"
+            [fields]="{
+              text: 'salesmanname',
+              value: 'id'
+            }"
+            [(value)]="memberSalesmanId"
+            [enabled]="!membershipLocked && !memberLimitReached"
+            [allowFiltering]="true"
+            placeholder="Select salesman">
+          </ejs-dropdownlist>
+
+          <ejs-dropdownlist
+            name="newRole"
+            [dataSource]="roleOptions"
+            [fields]="{
+              text: 'value',
+              value: 'key'
+            }"
+            [(value)]="memberRole"
+            [enabled]="!membershipLocked && !memberLimitReached"
+            placeholder="Select role">
+          </ejs-dropdownlist>
+
+          <ejs-numerictextbox
+            name="newTarget"
+            [(value)]="memberTarget"
+            [enabled]="!membershipLocked && !memberLimitReached"
+            [min]="0"
+            [decimals]="2"
+            format="n2"
+            [showSpinButton]="false"
+            placeholder="Target amount">
+          </ejs-numerictextbox>
+
+          <button
+            type="button"
+            class="primary-btn"
+            [disabled]="!memberSalesmanId || membershipLocked || memberLimitReached"
+            (click)="addMember()">
+            Add
+          </button>
+
+        </div>
+      </div>
+
+      <!-- MEMBERS TABLE -->
+      <div class="member-table-wrap">
+        <table class="member-table edit-member-table">
+
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>SALESMAN</th>
+              <th>ROLE</th>
+              <th>TARGET AMOUNT</th>
+              <th>STATUS</th>
+              <th>ACTION</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (
+              member of form.members;
+              track member.salesmanid;
+              let index = $index
+            ) {
+              <tr>
+                <td>{{ index + 1 }}</td>
+
+                <td>
+                  <strong>
+                    {{ memberName(member.salesmanid) }}
+                  </strong>
+                  <small>
+                    {{ memberCode(member.salesmanid) }}
+                  </small>
+                </td>
+
+                <td>
+                  @if (
+                    member.salesmanid === form.teamleaderid
+                  ) {
+                    <span class="leader-badge">
+                      Team Leader
+                    </span>
+                  } @else {
+                    <ejs-dropdownlist
+                      [dataSource]="roleOptions"
+                      [fields]="{
+                        text: 'value',
+                        value: 'key'
+                      }"
+                      [(value)]="member.role"
+                      [enabled]="!membershipLocked">
+                    </ejs-dropdownlist>
+                  }
+                </td>
+
+                <td>
+                  <ejs-numerictextbox
+                    [(value)]="member.targetamount"
+                    [enabled]="!membershipLocked"
+                    [min]="0"
+                    [decimals]="2"
+                    format="n2"
+                    [showSpinButton]="false">
+                  </ejs-numerictextbox>
+                </td>
+
+                <td>
+                  <span
+                    class="status-badge"
+                    [class.inactive]="member.status === 2">
+                    <span class="status-dot"></span>
+                    {{
+                      member.status === 1
+                        ? 'Active'
+                        : 'Inactive'
+                    }}
+                  </span>
+                </td>
+
+                <td>
+                  @if (
+                    member.salesmanid === form.teamleaderid
+                  ) {
+                    <span class="leader-note">
+                      Leader
+                    </span>
+                  } @else {
+                    <button
+                      type="button"
+                      class="remove-member-btn"
+                      [disabled]="membershipLocked"
+                      (click)="requestRemoveMember(
+                        member.salesmanid
+                      )">
+                      Delete
+                    </button>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6" class="empty">
+                  No members added yet.
+                </td>
+              </tr>
+            }
+          </tbody>
+
+          <tfoot>
+            <tr>
+              <td colspan="3">
+                <strong>Total Target</strong>
+              </td>
+              <td>
+                <strong>
+                  {{ totalTarget | number:'1.2-2' }}
+                </strong>
+              </td>
+              <td colspan="2"></td>
+            </tr>
+          </tfoot>
+
+        </table>
+      </div>
+
+      <!-- FOOTER -->
+      <div class="modal-footer">
+
+        @if (editingId !== null) {
+              <button
+            type="button"
+            class="danger-btn delete-team-btn"
+            [disabled]="saving || processing"
+            (click)="deleteEditingTeam()">
+            Delete Team
+          </button>
+        }
+
+        <button
+          type="button"
+          class="secondary-btn"
+          [disabled]="saving"
+          (click)="closeForm()">
+          Cancel
+        </button>
+
+        <button
+          type="submit"
+          class="primary-btn"
+          [disabled]="saving || form.members.length === 0">
+          {{
+            saving
+              ? 'Saving...'
+              : editingId === null
+                ? 'Create Team'
+                : 'Update Team'
+          }}
+        </button>
+
+      </div>
+
+    </form>
+
+  </ng-template>
+</ejs-dialog>
+
+<!-- =====================================
+     CONFIRMATION MODAL
+===================================== -->
+<ejs-dialog
+  [visible]="confirmOpen"
+  [isModal]="true"
+  [showCloseIcon]="true"
+  width="420px"
+  target="body"
+  cssClass="marketing-modal confirm-dialog"
+  [header]="confirmTitle"
+  (close)="closeConfirmation()">
+
+  <ng-template #content>
+    <div class="confirm-content">
+
+      <div
+        class="confirm-icon"
+        [class.danger]="confirmDanger">
+        !
+      </div>
+
+      <p>{{ confirmMessage }}</p>
+
+      <div class="confirm-actions">
+
+        <button
+          type="button"
+          class="secondary-btn"
+          (click)="closeConfirmation()">
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          class="primary-btn"
+          [class.danger-btn]="confirmDanger"
+          [disabled]="processing || saving"
+          (click)="confirmAction()">
+          {{ confirmButton }}
+        </button>
+
+      </div>
+    </div>
+  </ng-template>
+</ejs-dialog>
+
+<!-- TOAST NOTIFICATION -->
+@if (toastVisible) {
+  <div
+    class="team-toast"
+    [class.error-toast]="!toastSuccess"
+    role="status">
+
+    <div>
+      <strong>
+        {{ toastSuccess ? 'Success' : 'Error' }}
+      </strong>
+      <p>{{ toastMessage }}</p>
+    </div>
+
+    <button
+      type="button"
+      (click)="dismissToast()">
+      ×
+    </button>
+  </div>
+}

@@ -1,0 +1,15 @@
+<div class="app-shell">
+  <aside class="sidebar" [class.sidebar-open]="menuOpen">
+    <a class="brand" routerLink="/dashboard" (click)="menuOpen=false"><span class="brand-mark">SM</span><span class="brand-name">SalesMarketing<small>MANAGEMENT SYSTEM</small></span></a>
+    <div class="nav-caption">WORKSPACE</div>
+    <nav aria-label="Primary navigation">
+      <a routerLink="/dashboard" routerLinkActive="active" (click)="menuOpen=false"><span class="nav-icon">▦</span><span>Dashboard</span></a>
+      <div class="nav-caption section-label">MASTERS</div>
+      <a routerLink="/salesman" routerLinkActive="active" (click)="menuOpen=false"><span class="nav-icon">♙</span><span>Salesman Master</span></a>
+      @if (auth.hasRole('MasterAdmin')) { <a routerLink="/marketing-team" routerLinkActive="active" (click)="menuOpen=false"><span class="nav-icon">▤</span><span>Marketing Teams</span></a> }
+    </nav>
+    <div class="sidebar-footer"><div class="profile-avatar">{{ (auth.user()?.username || 'A').slice(0,1).toUpperCase() }}</div><div class="profile-details"><strong>{{ auth.user()?.username }}</strong><small>{{ auth.hasRole('MasterAdmin') ? 'Master Administrator' : 'Sales Manager' }}</small></div></div>
+  </aside>
+  @if (menuOpen) { <button class="mobile-overlay" aria-label="Close menu" (click)="menuOpen=false"></button> }
+  <div class="main-content"><header class="topbar"><div class="topbar-left"><button class="menu-toggle" aria-label="Open navigation" (click)="menuOpen=!menuOpen">☰</button><div><span class="topbar-label">SALES OPERATIONS</span><strong>Management workspace</strong></div></div><div class="topbar-right"><span class="access-pill">● Secure workspace</span><button ejs-button cssClass="e-outline" (click)="logout()">Sign out</button></div></header><main class="page-content"><router-outlet /></main><footer class="app-footer">SalesMarketing · Administration workspace</footer></div>
+</div>

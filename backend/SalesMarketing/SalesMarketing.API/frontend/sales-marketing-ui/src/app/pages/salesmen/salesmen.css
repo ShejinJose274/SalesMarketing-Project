@@ -1,0 +1,519 @@
+
+/* ==========================================
+   PAGE HEADING
+========================================== */
+
+.page-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+.page-heading h2 {
+  margin: 0 0 7px;
+  font-size: 28px;
+  color: #14213a;
+}
+
+.muted {
+  color: #78879c;
+  margin: 0;
+}
+
+/* ==========================================
+   SEARCH TOOLBAR
+========================================== */
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.count {
+  font-size: 12px;
+  color: #8794a5;
+  margin-left: auto;
+}
+
+/* ==========================================
+   GRID
+========================================== */
+
+.salesman-grid-wrapper {
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+:host ::ng-deep .salesman-grid-wrapper .e-grid {
+  width: 100%;
+  border-radius: 8px;
+}
+
+:host ::ng-deep .e-grid .e-rowcell {
+  vertical-align: middle;
+}
+
+:host ::ng-deep .e-grid .e-rowcell small,
+:host ::ng-deep .e-grid .e-rowcell strong {
+  display: block;
+}
+
+:host ::ng-deep .e-grid .e-rowcell .link {
+  display: block;
+  margin-left: 0;
+  font-weight: 700;
+  color: #009688;
+}
+
+:host ::ng-deep .e-grid .e-rowcell small {
+  margin-top: 5px;
+  color: #526176;
+  font-size: 11px;
+}
+
+.email-cell {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ==========================================
+   DETAIL ROW ARROW
+========================================== */
+
+/*
+  Hide only the expansion icons.
+  Do not use display:none on structural
+  Grid cells, because it shifts columns.
+*/
+
+:host ::ng-deep .e-grid .e-detailrowcollapse,
+:host ::ng-deep .e-grid .e-detailrowexpand {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+:host ::ng-deep .e-grid .e-detailrow .e-detailcell {
+  padding: 0 !important;
+  border: 0;
+}
+
+/* ==========================================
+   STATUS BADGES
+========================================== */
+
+.status {
+  display: inline-block;
+  background: #e3f7f0;
+  color: #16866f;
+  border-radius: 20px;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.status.inactive {
+  background: #edf0f4;
+  color: #78879c;
+}
+
+/* ==========================================
+   ACTION BUTTONS
+========================================== */
+
+.salesman-actions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+.action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  padding: 8px 11px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.action-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.action-edit {
+  background: #e0f5f0;
+  color: #008577;
+  border-color: #b7e8dc;
+}
+
+.action-edit:hover:not(:disabled) {
+  background: #c8ece3;
+}
+
+.action-status {
+  background: #e8efff;
+  color: #2758a5;
+  border-color: #c9d8f5;
+}
+
+.action-status:hover:not(:disabled) {
+  background: #d5e3ff;
+}
+
+.action-delete {
+  background: #fff0f0;
+  color: #d33131;
+  border-color: #f5cccc;
+}
+
+.action-delete:hover:not(:disabled) {
+  background: #ffe0e0;
+}
+
+/* ==========================================
+   INLINE EDIT PANEL
+========================================== */
+
+.inline-edit-panel {
+  padding: 24px;
+  background: #f8fafc;
+  border-left: 4px solid #009688;
+  animation: slideDown 0.2s ease-out;
+}
+
+.inline-edit-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.inline-edit-heading h3 {
+  margin: 0 0 5px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #172b4d;
+}
+
+.inline-edit-heading p {
+  margin: 0;
+  font-size: 12px;
+  color: #78879c;
+}
+
+.inline-close-button {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 7px;
+  background: #e8edf2;
+  color: #526176;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.inline-close-button:hover:not(:disabled) {
+  background: #dce4ec;
+}
+
+/* ==========================================
+   FORM FIELDS
+========================================== */
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.form-grid label {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: #526176;
+}
+
+.field-error {
+  display: block;
+  color: #bd5555;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+/* ==========================================
+   FORM BUTTONS
+========================================== */
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.form-cancel-button,
+.form-save-button {
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.form-cancel-button {
+  background: #fff;
+  border: 1px solid #d5dce5;
+  color: #526176;
+}
+
+.form-cancel-button:hover:not(:disabled) {
+  background: #f1f5f9;
+}
+
+.form-save-button {
+  background: #009688;
+  border: 1px solid #009688;
+  color: #fff;
+}
+
+.form-save-button:hover:not(:disabled) {
+  background: #007d71;
+}
+
+.form-cancel-button:disabled,
+.form-save-button:disabled,
+.inline-close-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ==========================================
+   CUSTOM TOAST NOTIFICATIONS
+========================================== */
+
+.app-toast {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 10000;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+
+  width: min(360px, calc(100vw - 32px));
+  padding: 15px 17px;
+
+  background: #fff;
+  border: 1px solid #dce4ec;
+  border-left: 4px solid #009688;
+  border-radius: 10px;
+
+  box-shadow: 0 8px 30px rgba(20, 33, 58, 0.15);
+  animation: toastEnter 0.2s ease-out;
+}
+
+.toast-success {
+  border-left-color: #009688;
+}
+
+.toast-error {
+  border-left-color: #d33131;
+}
+
+.toast-content {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.toast-content strong {
+  color: #14213a;
+  font-size: 13px;
+}
+
+.toast-content span {
+  color: #526176;
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.toast-close {
+  background: transparent;
+  border: 0;
+  color: #78879c;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* ==========================================
+   SYNCFUSION CONFIRMATION MODAL
+========================================== */
+
+.confirmation-content {
+  padding: 12px 4px 4px;
+  text-align: center;
+}
+
+.confirmation-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 18px;
+
+  background: #e3f7f0;
+  color: #008577;
+
+  border-radius: 50%;
+  font-size: 26px;
+  font-weight: 800;
+}
+
+.confirmation-icon.confirmation-danger {
+  background: #fff0f0;
+  color: #d33131;
+}
+
+.confirmation-message {
+  margin: 0 0 25px;
+  color: #526176;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.confirmation-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.confirmation-actions button {
+  min-width: 110px;
+}
+
+.confirm-delete {
+  background: #d33131 !important;
+  border-color: #d33131 !important;
+}
+
+.confirm-delete:hover:not(:disabled) {
+  background: #b82424 !important;
+}
+
+/* ==========================================
+   LOADING / EMPTY
+========================================== */
+
+.loading,
+.empty {
+  text-align: center;
+  color: #7a889b;
+  padding: 30px;
+}
+
+/* ==========================================
+   ANIMATIONS
+========================================== */
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes toastEnter {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ==========================================
+   RESPONSIVE DESIGN
+========================================== */
+
+@media (max-width: 768px) {
+  .page-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .inline-edit-panel {
+    padding: 16px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .toolbar {
+    align-items: stretch;
+  }
+
+  .count {
+    margin-left: 0;
+  }
+
+  .app-toast {
+    top: 12px;
+    right: 12px;
+  }
+
+  .confirmation-actions {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-heading h2 {
+    font-size: 24px;
+  }
+
+  .modal-actions {
+    flex-wrap: wrap;
+  }
+}

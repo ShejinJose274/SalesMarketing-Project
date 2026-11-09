@@ -1,0 +1,19 @@
+<section class="page-heading"><div><p class="eyebrow">Dashboard / Overview</p><h2>Welcome back, {{ auth.user()?.username }} <span class="wave">👋</span></h2><p class="muted">An overview of your sales force and marketing operations.</p></div><a ejs-button cssClass="e-primary" routerLink="/salesman">View salesmen</a></section>
+@if (error) { <div class="error">{{ error }}</div> }
+@if (loading) { <div class="loading">Loading your dashboard…</div> } @else {
+<div class="stats">
+  <article><span class="stat-icon teal">♙</span><div><span>Total salesmen</span><strong>{{ salesmen.length }}</strong><small>All registered records</small></div></article>
+  <article><span class="stat-icon blue">✓</span><div><span>Active salesmen</span><strong>{{ activeSalesmen }}</strong><small>Currently active</small></div></article>
+  <article><span class="stat-icon orange">◷</span><div><span>Inactive salesmen</span><strong>{{ inactiveSalesmen }}</strong><small>Currently inactive</small></div></article>
+  @if (auth.hasRole('MasterAdmin')) { <article><span class="stat-icon purple">▤</span><div><span>Active teams</span><strong>{{ activeTeams }}</strong><small>{{ teams.length }} total teams</small></div></article> }
+</div>
+<div class="dashboard-grid">
+  <section class="card"><div class="card-heading"><div><h3>Recent salesmen</h3><p class="muted">Your sales force at a glance</p></div><a routerLink="/salesman">View all →</a></div>
+  @for (person of salesmen.slice(0, 6); track person.id) { <div class="list-row"><span class="avatar">{{ person.salesmanname.slice(0,1).toUpperCase() }}</span><div><strong>{{ person.salesmanname }}</strong><small>{{ person.salesmancode }}</small></div><span class="status" [class.inactive]="person.status === 2">{{ person.status === 1 ? 'Active' : 'Inactive' }}</span></div> } @empty { <p class="empty">No salesmen found.</p> }
+  </section>
+  <section class="card"><div class="card-heading"><div><h3>{{ auth.hasRole('MasterAdmin') ? 'Marketing teams' : 'Quick access' }}</h3><p class="muted">{{ auth.hasRole('MasterAdmin') ? 'Team performance overview' : 'Manage your workspace' }}</p></div>@if (auth.hasRole('MasterAdmin')) { <a routerLink="/marketing-team">View all →</a> }</div>
+  @if (auth.hasRole('MasterAdmin')) { @for (team of teams.slice(0, 6); track team.id) { <div class="list-row"><span class="avatar team">{{ team.teamname.slice(0,1).toUpperCase() }}</span><div><strong>{{ team.teamname }}</strong><small>{{ team.teamcode }} · {{ team.salesmancount }} members</small></div><span class="status" [class.inactive]="team.status === 2">{{ team.status === 1 ? 'Active' : 'Inactive' }}</span></div> } @empty { <p class="empty">No marketing teams found.</p> } }
+  @else { <div class="quick-action"><p>Keep salesman records accurate and up to date.</p><a ejs-button cssClass="e-primary" routerLink="/salesman">Open Salesman Master</a></div> }
+  </section>
+</div>
+}
