@@ -244,18 +244,22 @@
               </label>
 
               <!-- STATUS -->
+                      <!-- STATUS - READ ONLY WHILE EDITING -->
               <label>
                 Status
 
-                <ejs-dropdownlist
-                  name="editStatus"
-                  [dataSource]="[
-                    { text: 'Active', value: 1 },
-                    { text: 'Inactive', value: 2 }
-                  ]"
-                  [fields]="{ text: 'text', value: 'value' }"
-                  formControlName="status">
-                </ejs-dropdownlist>
+                <input
+                  type="text"
+                  [value]="salesmanForm.controls.status.value === 1
+                    ? 'Active'
+                    : 'Inactive'"
+                  disabled
+                  class="form-control"
+                />
+
+                <small class="text-muted">
+                  To change status, use the Activate/Deactivate button.
+                </small>
               </label>
 
             </div>

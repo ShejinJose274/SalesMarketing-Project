@@ -212,12 +212,20 @@ public class SalesmanService
             throw new InvalidOperationException(
                 "Salesman code already exists.");
 
+
+        if (dto.Status != salesman.Status)
+        {
+            throw new InvalidOperationException(
+                "Salesman status cannot be changed through Edit. " +
+                "Use the Activate/Deactivate action instead.");
+        }
+
         salesman.Salesmancode = code;
         salesman.Salesmanname = dto.Salesmanname.Trim();
         salesman.Mobileno = dto.Mobileno;
         salesman.Email = dto.Email;
         salesman.Joiningdate = dto.Joiningdate;
-        salesman.Status = dto.Status;
+        //salesman.Status = dto.Status;
         salesman.Modifieddate = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();

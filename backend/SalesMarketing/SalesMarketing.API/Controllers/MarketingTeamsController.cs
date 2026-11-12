@@ -11,7 +11,7 @@ namespace SalesMarketing.API.Controllers
 {
     [ApiController]
     [Route("api/marketingteams")]
-    //[Authorize(Roles = AppRoles.MasterAdmin)]
+    [Authorize(Roles = AppRoles.MasterAdmin)]
     public class MarketingTeamsController : ControllerBase
     {
         private readonly MarketingTeamService _service;
@@ -202,15 +202,72 @@ namespace SalesMarketing.API.Controllers
 
         // 6. ACTIVATE OR DEACTIVATE MARKETING TEAM
         // PATCH: api/marketingteams/1/status?status=2
+        //[HttpPatch("{id:long}/status")]
+        //public async Task<IActionResult> ChangeStatus(
+        //    long id,
+        //    [FromQuery] short status)
+        //{
+        //    try
+        //    {
+        //        bool updated = await _service.ChangeStatusAsync(
+        //            id, status);
+
+        //        if (!updated)
+        //        {
+        //            return NotFound(new
+        //            {
+        //                message = "Marketing team not found."
+        //            });
+        //        }
+
+        //        return Ok(new
+        //        {
+        //            message = status == 1
+        //                ? "Marketing team activated successfully."
+        //                : "Marketing team deactivated successfully."
+        //        });
+        //    }
+        //    catch (ArgumentException ex)
+        //    {
+        //        return BadRequest(new
+        //        {
+        //            message = ex.Message
+        //        });
+        //    }
+        //    catch (InvalidOperationException ex)
+        //    {
+        //        return Conflict(new
+        //        {
+        //            message = ex.Message
+        //        });
+        //    }
+        //    catch (DbUpdateException ex)
+        //        when (ex.InnerException is PostgresException pg &&
+        //              pg.SqlState == PostgresErrorCodes.UniqueViolation)
+        //    {
+        //        return Conflict(new
+        //        {
+        //            message = "A salesman already has an active team assignment."
+        //        });
+        //    }
+        //}
+
+
+
+
+
+
+
         [HttpPatch("{id:long}/status")]
         public async Task<IActionResult> ChangeStatus(
             long id,
-            [FromQuery] short status)
+            [FromQuery] short status,
+            [FromQuery] long? newLeaderId = null)
         {
             try
             {
                 bool updated = await _service.ChangeStatusAsync(
-                    id, status);
+                    id, status, newLeaderId);
 
                 if (!updated)
                 {
@@ -229,9 +286,45 @@ namespace SalesMarketing.API.Controllers
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(new
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
+            catch (DbUpdateException ex)
+                when (ex.InnerException is PostgresException pg &&
+                      pg.SqlState == PostgresErrorCodes.UniqueViolation)
+            {
+                return Conflict(new
                 {
-                    message = ex.Message
+                    message = "Selected salesman already has an active team assignment."
+                });
+            }
+        }
+
+
+        // 7. DELETE MARKETING TEAM (SOFT DELETE)
+        // DELETE: api/marketingteams/1
+
+        [HttpDelete("{id:long}")]
+        public async Task<IActionResult> Delete(long id)
+        {
+            try
+            {
+                bool deleted = await _service.DeleteAsync(id);
+
+                if (!deleted)
+                {
+                    return NotFound(new
+                    {
+                        message = "Marketing team not found."
+                    });
+                }
+
+                return Ok(new
+                {
+                    message = "Marketing team deleted successfully."
                 });
             }
             catch (InvalidOperationException ex)
@@ -241,36 +334,7 @@ namespace SalesMarketing.API.Controllers
                     message = ex.Message
                 });
             }
-            catch (DbUpdateException ex)
-                when (ex.InnerException is PostgresException pg &&
-                      pg.SqlState == PostgresErrorCodes.UniqueViolation)
-            {
-                return Conflict(new
-                {
-                    message = "A salesman already has an active team assignment."
-                });
-            }
         }
 
-        // 7. DELETE MARKETING TEAM (SOFT DELETE)
-        // DELETE: api/marketingteams/1
-        [HttpDelete("{id:long}")]
-        public async Task<IActionResult> Delete(long id)
-        {
-            bool deleted = await _service.DeleteAsync(id);
-
-            if (!deleted)
-            {
-                return NotFound(new
-                {
-                    message = "Marketing team not found."
-                });
-            }
-
-            return Ok(new
-            {
-                message = "Marketing team deleted successfully."
-            });
-        }
     }
 }

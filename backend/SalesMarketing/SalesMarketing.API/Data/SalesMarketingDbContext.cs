@@ -26,7 +26,11 @@ public partial class SalesMarketingDbContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("marketingteam_pkey");
 
-            entity.ToTable("marketingteam", table => table.HasCheckConstraint("ck_marketingteam_status", "status IN (1, 2)"));
+            entity.ToTable("marketingteam", table =>
+                table.HasCheckConstraint(
+                    "ck_marketingteam_status",
+                    "status IN (1, 2, 3)"
+                ));
 
             entity.HasIndex(e => e.Teamcode, "uq_marketingteam_code").IsUnique();
 

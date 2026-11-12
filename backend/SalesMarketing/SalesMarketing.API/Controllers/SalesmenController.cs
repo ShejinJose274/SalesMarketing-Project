@@ -11,7 +11,7 @@ namespace SalesMarketing.API.Controllers;
 
 [ApiController]
 [Route("api/salesmen")]
-//[Authorize]
+[Authorize]
 public class SalesmenController : ControllerBase
 {
     private readonly SalesmanService _service;
@@ -23,8 +23,8 @@ public class SalesmenController : ControllerBase
 
     // GET: api/salesmen
     [HttpGet]
-    //[Authorize(Roles =
-    //    AppRoles.MasterAdmin + "," + AppRoles.SalesManagerAdmin)]
+    [Authorize(Roles =
+        AppRoles.MasterAdmin + "," + AppRoles.SalesManagerAdmin)]
     public async Task<IActionResult> GetAll(
         [FromQuery] string? search = null,
         [FromQuery] short? status = null,
@@ -39,8 +39,8 @@ public class SalesmenController : ControllerBase
 
     // GET: api/salesmen/1
     [HttpGet("{id:long}")]
-    //[Authorize(Roles =
-    //    AppRoles.MasterAdmin + "," + AppRoles.SalesManagerAdmin)]
+    [Authorize(Roles =
+        AppRoles.MasterAdmin + "," + AppRoles.SalesManagerAdmin)]
     public async Task<IActionResult> GetById(long id)
     {
         var salesman = await _service.GetByIdAsync(id);
@@ -56,7 +56,7 @@ public class SalesmenController : ControllerBase
 
     // POST: api/salesmen
     [HttpPost]
-    //[Authorize(Roles = AppRoles.SalesManagerAdmin)]
+    [Authorize(Roles = AppRoles.SalesManagerAdmin)]
     public async Task<IActionResult> Create(SalesmanDto dto)
     {
         try
@@ -89,7 +89,7 @@ public class SalesmenController : ControllerBase
 
     // PUT: api/salesmen/1
     [HttpPut("{id:long}")]
-    //[Authorize(Roles = AppRoles.SalesManagerAdmin)]
+    [Authorize(Roles = AppRoles.SalesManagerAdmin)]
     public async Task<IActionResult> Update(
         long id,
         SalesmanDto dto)
@@ -131,7 +131,7 @@ public class SalesmenController : ControllerBase
     // PATCH: api/salesmen/1/status
 
     [HttpPatch("{id:long}/status")]
-    //[Authorize(Roles = AppRoles.SalesManagerAdmin)]
+    [Authorize(Roles = AppRoles.SalesManagerAdmin)]
     public async Task<IActionResult> ChangeStatus(
         long id,
         [FromQuery] short status)
@@ -212,8 +212,8 @@ public class SalesmenController : ControllerBase
     // GET: api/salesmen/status/1
 
     [HttpGet("status/{status:int}")]
-    //[Authorize(Roles =
-    //    AppRoles.MasterAdmin + "," + AppRoles.SalesManagerAdmin)]
+    [Authorize(Roles =
+        AppRoles.MasterAdmin + "," + AppRoles.SalesManagerAdmin)]
     public async Task<IActionResult> GetByStatus(int status)
     {
         if (status != 1 && status != 2)
@@ -233,8 +233,8 @@ public class SalesmenController : ControllerBase
 
     // GET: api/salesmen/available
     [HttpGet("available")]
-    //[Authorize(Roles =
-    //    AppRoles.MasterAdmin + "," + AppRoles.SalesManagerAdmin)]
+    [Authorize(Roles =
+        AppRoles.MasterAdmin + "," + AppRoles.SalesManagerAdmin)]
     public async Task<IActionResult> GetAvailableSalesmen()
     {
         var salesmen = await _service.GetAvailableSalesmenAsync();

@@ -1,5 +1,6 @@
 
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using SalesMarketing.API.Data;
 using SalesMarketing.API.Services;
@@ -86,7 +87,13 @@ builder.Services
     });
 
 // Register authorization
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy =
+        new AuthorizationPolicyBuilder()
+            .RequireAuthenticatedUser()
+            .Build();
+});
 
 // Register SalesmanService
 builder.Services.AddScoped<SalesmanService>();

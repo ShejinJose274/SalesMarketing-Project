@@ -69,14 +69,22 @@ public class AuthController : ControllerBase
             CookieAuthenticationDefaults.AuthenticationScheme,
             principal);
 
+        //return Ok(new
+        //{
+        //    username = dto.Username,
+        //    role,
+        //    dashboardUrl = role == AppRoles.MasterAdmin
+        //        ? "/admin/dashboard"
+        //        : "/manager/dashboard"
+        //});
+
         return Ok(new
         {
             username = dto.Username,
             role,
-            dashboardUrl = role == AppRoles.MasterAdmin
-                ? "/admin/dashboard"
-                : "/manager/dashboard"
+            dashboardUrl = "/dashboard"
         });
+
     }
 
     private static bool CredentialsMatch(

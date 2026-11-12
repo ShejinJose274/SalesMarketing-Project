@@ -762,6 +762,66 @@
   </ng-template>
 </ejs-dialog>
 
+<!-- REPLACEMENT TEAM LEADER DIALOG -->
+<ejs-dialog
+  [visible]="replacementOpen"
+  [isModal]="true"
+  [showCloseIcon]="!processing"
+  [closeOnEscape]="!processing"
+  width="min(480px, 95vw)"
+  target="body"
+  cssClass="marketing-modal"
+  header="Select New Team Leader"
+  (close)="closeReplacementDialog()">
+
+  <ng-template #content>
+    <div class="confirm-content">
+      <p>
+        The current Team Leader is unavailable. Select another
+        available active salesman to activate
+        <strong>{{ replacementTeam?.teamname }}</strong>.
+      </p>
+
+      @if (replacementLoading) {
+        <div class="loading">Loading available salesmen...</div>
+      } @else {
+        @if (replacementError) {
+          <div class="form-error">{{ replacementError }}</div>
+        }
+        <div class="edit-form-grid">
+          <label class="wide">
+            New Team Leader *
+            <ejs-dropdownlist
+              name="replacementLeader"
+              [dataSource]="replacementSalesmen"
+              [fields]="{ text: 'salesmanname', value: 'id' }"
+              [(value)]="selectedLeaderId"
+              [allowFiltering]="true"
+              [enabled]="!processing"
+              placeholder="Select available salesman">
+            </ejs-dropdownlist>
+          </label>
+        </div>
+        @if (replacementSalesmen.length === 0) {
+          <p class="member-warning">No available active salesmen found.</p>
+        }
+      }
+
+      <div class="confirm-actions">
+        <button type="button" class="secondary-btn"
+          [disabled]="processing" (click)="closeReplacementDialog()">
+          Cancel
+        </button>
+        <button type="button" class="primary-btn"
+          [disabled]="processing || replacementLoading || !selectedLeaderId"
+          (click)="activateWithNewLeader()">
+          {{ processing ? 'Activating...' : 'Activate Team' }}
+        </button>
+      </div>
+    </div>
+  </ng-template>
+</ejs-dialog>
+
 <!-- TOAST NOTIFICATION -->
 @if (toastVisible) {
   <div
