@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.RateLimiting;
 using SalesMarketing.API.Data;
 using SalesMarketing.API.Services;
 
@@ -13,6 +14,21 @@ var frontendOrigins = builder.Configuration
 
 // Add controllers
 builder.Services.AddControllers();
+builder.Services.AddProblemDetails();
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy("login", context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 10,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0
+            }));
+});
 
 builder.Services.AddCors(options =>
 {
@@ -47,6 +63,7 @@ builder.Services
         options.Cookie.SameSite = SameSiteMode.None;
 
         options.ExpireTimeSpan = TimeSpan.FromHours(2);
+        options.SlidingExpiration = true;
 
 
         options.Events.OnRedirectToLogin = async context =>
@@ -103,6 +120,8 @@ builder.Services.AddScoped<MarketingTeamService>();
 
 var app = builder.Build();
 
+app.UseExceptionHandler();
+
 // Swagger for development
 if (app.Environment.IsDevelopment())
 {
@@ -117,6 +136,7 @@ app.UseCors("Frontend");
 // Correct middleware order
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 
 // Basic origin check for state-changing requests
 app.Use(async (context, next) =>

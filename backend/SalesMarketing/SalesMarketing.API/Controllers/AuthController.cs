@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using SalesMarketing.API.DTOs.Auth;
 using SalesMarketing.API.Enums;
 
@@ -16,14 +17,17 @@ namespace SalesMarketing.API.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IConfiguration _configuration;
+    private readonly ILogger<AuthController> _logger;
 
-    public AuthController(IConfiguration configuration)
+    public AuthController(IConfiguration configuration, ILogger<AuthController> logger)
     {
         _configuration = configuration;
+        _logger = logger;
     }
 
     [AllowAnonymous]
     [HttpPost("login")]
+    [EnableRateLimiting("login")]
     public async Task<IActionResult> Login(LoginDto dto)
     {
         string? role = null;
@@ -47,6 +51,7 @@ public class AuthController : ControllerBase
 
         if (role == null)
         {
+            _logger.LogWarning("Failed login attempt for username {Username} from {RemoteIpAddress}.", dto.Username, HttpContext.Connection.RemoteIpAddress);
             return Unauthorized(new
             {
                 message = "Invalid username or password."
@@ -69,14 +74,7 @@ public class AuthController : ControllerBase
             CookieAuthenticationDefaults.AuthenticationScheme,
             principal);
 
-        //return Ok(new
-        //{
-        //    username = dto.Username,
-        //    role,
-        //    dashboardUrl = role == AppRoles.MasterAdmin
-        //        ? "/admin/dashboard"
-        //        : "/manager/dashboard"
-        //});
+        _logger.LogInformation("User {Username} signed in with role {Role}.", dto.Username, role);
 
         return Ok(new
         {
@@ -133,6 +131,8 @@ public class AuthController : ControllerBase
     {
         await HttpContext.SignOutAsync(
             CookieAuthenticationDefaults.AuthenticationScheme);
+
+        _logger.LogInformation("User {Username} signed out.", User.Identity?.Name);
 
         return Ok(new
         {

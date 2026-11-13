@@ -112,10 +112,11 @@ Stores salesman assignments to teams.
 - `targetamount`: numeric `(18,2)`, not negative
 - `status`: `1` Active or `2` Inactive
 - Unique `(marketingteamid, salesmanid)` constraint
+- Unique filtered index on `salesmanid` for active assignments (`status = 1`)
 
 Team deletion uses cascade behavior for detail rows. Salesman references use restricted deletion, so assigned salesmen cannot be physically deleted. EF Core mappings are in `Data/SalesMarketingDbContext.cs`.
 
-> Database migrations or a standalone schema script are not included in the current project tree. Create the required PostgreSQL schema before starting the API, or add and apply an EF Core migration as part of your deployment process.
+> The H8 index deployment script is at `backend/SalesMarketing/SalesMarketing.API/Data/Sql/20261112_add_active_salesman_unique_index.sql`. Run its duplicate check, resolve any returned rows, then apply the `CREATE UNIQUE INDEX` statement to an existing database. The same index is also configured in EF Core for newly created schemas.
 
 ## Enumerations
 
@@ -174,7 +175,7 @@ Do not commit real passwords or production connection strings.
 
 ### Development login configuration
 
-`AuthController` compares the submitted login values with the configured development credentials and creates an HTTP-only authentication cookie.
+`AuthController` compares the submitted login values with the configured development credentials and creates an HTTP-only authentication cookie. Login is rate-limited per remote IP. The current fixed-account approach is for development/demo use; use an identity provider or hashed application-user store for production.
 
 Configure credentials outside source control, preferably with user secrets:
 

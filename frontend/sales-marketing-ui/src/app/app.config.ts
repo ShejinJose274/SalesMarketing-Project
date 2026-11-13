@@ -5,13 +5,11 @@ import {
   provideZoneChangeDetection
 } from '@angular/core';
 
-import {
-  provideHttpClient,
-  withInterceptors
-} from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
+import { authInterceptor } from './interceptors/auth.interceptor';
 
 
 
@@ -28,12 +26,7 @@ export const appConfig: ApplicationConfig = {
 
     provideHttpClient(
       withInterceptors([
-        (request, next) =>
-          next(
-            request.clone({
-              withCredentials: true
-            })
-          )
+        authInterceptor
       ])
     )
   ]

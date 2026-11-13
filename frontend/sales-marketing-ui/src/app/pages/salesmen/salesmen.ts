@@ -81,6 +81,8 @@ export class Salesmen implements OnInit, OnDestroy {
   private readonly cdr = inject(ChangeDetectorRef);
 
   salesmen: Salesman[] = [];
+  gridData = { result: this.salesmen, count: 0 };
+  totalSalesmen = 0;
   readonly pageSettings = {
   pageSize: 10,
   currentPage: 1,
@@ -242,6 +244,13 @@ export class Salesmen implements OnInit, OnDestroy {
   this.load(false, true);
 }
 
+  onGridDataStateChange(event: { skip?: number; take?: number }): void {
+    const pageSize = event.take ?? this.pageSettings.pageSize;
+    const page = Math.floor((event.skip ?? 0) / pageSize) + 1;
+
+    this.load(false, false, page, pageSize);
+  }
+
   // ==========================================
   // LOAD SALESMEN
   // ==========================================
@@ -249,7 +258,9 @@ export class Salesmen implements OnInit, OnDestroy {
   
 load(
   preservePosition = false,
-  resetPage = false
+    resetPage = false,
+    requestedPage?: number,
+    requestedPageSize?: number
 ): void {
   this.loadSubscription?.unsubscribe();
 
@@ -261,7 +272,10 @@ load(
 
   const currentPage = resetPage
     ? 1
-    : (grid?.pageSettings.currentPage ?? 1);
+    : requestedPage ?? (grid?.pageSettings.currentPage ?? 1);
+  const pageSize = requestedPageSize
+    ?? grid?.pageSettings.pageSize
+    ?? this.pageSettings.pageSize;
 
   const status =
     this.filter === 'all'
@@ -271,39 +285,21 @@ load(
   this.loadSubscription = this.api.getSalesmen({
     search: this.search.trim(),
     status,
-    page: 1,
-    pageSize: 100
+    page: currentPage,
+    pageSize
   }).subscribe({
     next: response => {
       this.salesmen = [...response.items];
+      this.totalSalesmen = response.totalCount;
+      this.gridData = {
+        result: this.salesmen,
+        count: response.totalCount
+      };
 
       this.loading = false;
       this.firstLoad = false;
 
       this.cdr.detectChanges();
-
-      const updatedGrid = this.salesmenGrid;
-
-      if (updatedGrid) {
-        const pageSize =
-          updatedGrid.pageSettings.pageSize ?? 10;
-
-        const lastPage = Math.max(
-          1,
-          Math.ceil(this.salesmen.length / pageSize)
-        );
-
-        const targetPage = Math.min(
-          currentPage,
-          lastPage
-        );
-
-        if (
-          updatedGrid.pageSettings.currentPage !== targetPage
-        ) {
-          updatedGrid.goToPage(targetPage);
-        }
-      }
 
       if (preservePosition) {
         this.restoreScroll();

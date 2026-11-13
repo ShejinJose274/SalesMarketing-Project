@@ -74,6 +74,10 @@ public partial class SalesMarketingDbContext : DbContext
 
             entity.HasIndex(e => e.Salesmanid, "ix_mtdetail_salesmanid");
 
+            entity.HasIndex(e => e.Salesmanid, "uq_mtdetail_active_salesman")
+                .IsUnique()
+                .HasFilter("status = 1");
+
             entity.HasIndex(e => e.Marketingteamid, "ix_mtdetail_teamid");
 
             entity.HasIndex(e => new { e.Marketingteamid, e.Salesmanid }, "uq_mtdetail_team_salesman").IsUnique();

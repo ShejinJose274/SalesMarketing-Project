@@ -2,7 +2,8 @@
 import {
   Component,
   inject,
-  ChangeDetectorRef
+  ChangeDetectorRef,
+  OnInit
 } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
@@ -21,7 +22,7 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
-export class Login {
+export class Login implements OnInit {
 
   // Dependency injection
   readonly auth = inject(AuthService);
@@ -33,6 +34,12 @@ export class Login {
   username = '';
   password = '';
   error = '';
+
+  ngOnInit(): void {
+    if (new URLSearchParams(window.location.search).get('expired') === '1') {
+      this.error = 'Your session expired. Please sign in again.';
+    }
+  }
 
   // Login method
   submit() {

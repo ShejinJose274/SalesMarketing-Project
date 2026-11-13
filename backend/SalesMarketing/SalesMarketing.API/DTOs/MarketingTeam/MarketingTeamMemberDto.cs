@@ -15,8 +15,4 @@ public class MarketingTeamMemberDto
     public decimal Targetamount { get; set; }
 
     public short Status { get; set; } = 1;
-
-    //public short Status { get; set; } = 1;
-    // We removed the Status property because
-    // Angular does not need to decide the assignment status.
 }

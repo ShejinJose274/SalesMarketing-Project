@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard, roleGuard } from './guards/auth.guard';
+import { authGuard, guestGuard, roleGuard } from './guards/auth.guard';
 import { Login } from './pages/login/login';
 import { Dashboard } from './pages/dashboard/dashboard';
 import { MarketingTeams } from './pages/marketing-teams/marketing-teams';
@@ -8,7 +8,7 @@ import { Shell } from './pages/shell/shell';
 import { MarketingTeamView } from './pages/marketing-team-view/marketing-team-view';
 
 export const routes: Routes = [
-  { path: 'login', component: Login },
+  { path: 'login', component: Login, canActivate: [guestGuard] },
   { path: '', component: Shell, canActivate: [authGuard], children: [
     { path: 'dashboard', component: Dashboard },
     { path: 'salesman', component: Salesmen },

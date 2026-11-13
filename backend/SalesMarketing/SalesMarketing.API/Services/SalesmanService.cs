@@ -170,8 +170,8 @@ public class SalesmanService
         {
             Salesmancode = code,
             Salesmanname = dto.Salesmanname.Trim(),
-            Mobileno = dto.Mobileno,
-            Email = dto.Email,
+            Mobileno = NormalizeOptional(dto.Mobileno),
+            Email = NormalizeEmail(dto.Email),
             Joiningdate = dto.Joiningdate,
             Status = dto.Status,
             Createddate = DateTime.UtcNow
@@ -212,6 +212,12 @@ public class SalesmanService
             throw new InvalidOperationException(
                 "Salesman code already exists.");
 
+        if (!string.Equals(code, salesman.Salesmancode, StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException(
+                "Salesman code cannot be changed after creation.");
+        }
+
 
         if (dto.Status != salesman.Status)
         {
@@ -220,10 +226,9 @@ public class SalesmanService
                 "Use the Activate/Deactivate action instead.");
         }
 
-        salesman.Salesmancode = code;
         salesman.Salesmanname = dto.Salesmanname.Trim();
-        salesman.Mobileno = dto.Mobileno;
-        salesman.Email = dto.Email;
+        salesman.Mobileno = NormalizeOptional(dto.Mobileno);
+        salesman.Email = NormalizeEmail(dto.Email);
         salesman.Joiningdate = dto.Joiningdate;
         //salesman.Status = dto.Status;
         salesman.Modifieddate = DateTime.UtcNow;
@@ -231,6 +236,18 @@ public class SalesmanService
         await _context.SaveChangesAsync();
 
         return true;
+    }
+
+    private static string? NormalizeOptional(string? value)
+    {
+        var normalized = value?.Trim();
+        return string.IsNullOrWhiteSpace(normalized) ? null : normalized;
+    }
+
+    private static string? NormalizeEmail(string? value)
+    {
+        var normalized = NormalizeOptional(value);
+        return normalized?.ToLowerInvariant();
     }
 
     private static void ValidateRequest(SalesmanDto dto)

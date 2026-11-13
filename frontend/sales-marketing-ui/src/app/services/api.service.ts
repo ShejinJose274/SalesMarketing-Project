@@ -201,63 +201,48 @@ export class ApiService {
     return this.http.post<{ message: string }>(`${this.baseUrl}/marketingteams/${teamId}/members`, request);
   }
 
-  // changeTeamStatus(id: number, status: number) {
-  //   const params = new HttpParams().set('status', status);
-  //   return this.http.patch<{ message: string }>(`${this.baseUrl}/marketingteams/${id}/status`, {}, { params });
-  // }
-
-
-changeTeamStatus(
+  changeTeamStatus(
   id: number,
   status: number,
   newLeaderId?: number
-      ) {
-        let url =
-          `${this.baseUrl}/marketingteams/${id}/status?status=${status}`;
+  ) {
+    let url = `${this.baseUrl}/marketingteams/${id}/status?status=${status}`;
 
-        if (newLeaderId !== undefined) {
-          url += `&newLeaderId=${newLeaderId}`;
-        }
+    if (newLeaderId !== undefined) {
+      url += `&newLeaderId=${newLeaderId}`;
+    }
 
-        return this.http.patch<{ message: string }>(
-          url,
-          {},
-          { withCredentials: true }
-        );
-      }
-
+    return this.http.patch<{ message: string }>(url, {});
+  }
 
   deleteTeam(id: number) {
     return this.http.delete<{ message: string }>(`${this.baseUrl}/marketingteams/${id}`);
   }
 
-  
-errorMessage(error: unknown): string {
-  if (error instanceof HttpErrorResponse) {
+  errorMessage(error: unknown): string {
+    if (error instanceof HttpErrorResponse) {
 
-    if (error.status === 0) {
-      return 'Cannot connect to the server. Check whether the API is running, its URL and port, or browser CORS/HTTPS errors.';
+      if (error.status === 0) {
+        return 'Cannot connect to the server. Check whether the API is running, its URL and port, or browser CORS/HTTPS errors.';
+      }
+
+      if (error.status === 401) {
+        return 'You are not logged in. Please login again.';
+      }
+
+      if (error.status === 403) {
+        return error.error?.message ?? 'You do not have permission to perform this action.';
+      }
+
+      if (typeof error.error?.message === 'string') {
+        return error.error.message;
+      }
+
+      return `Request failed (HTTP ${error.status}).`;
     }
 
-    if (error.status === 401) {
-      return 'You are not logged in. Please login again.';
-    }
-
-    if (error.status === 403) {
-      return error.error?.message ??
-        'You do not have permission to perform this action.';
-    }
-
-    if (typeof error.error?.message === 'string') {
-      return error.error.message;
-    }
-
-    return `Request failed (HTTP ${error.status}).`;
+    return 'An unexpected error occurred.';
   }
-
-  return 'An unexpected error occurred.';
-}
-
 
   private queryParams(query: Record<string, string | number | undefined>): HttpParams {
     let params = new HttpParams();

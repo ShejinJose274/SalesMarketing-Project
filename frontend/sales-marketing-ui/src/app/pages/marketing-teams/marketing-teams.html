@@ -57,7 +57,7 @@
 
     <div class="toolbar-actions">
       <span class="record-count">
-        {{ teams.length }} records
+       {{ totalVisibleTeams }} records
       </span>
 
       <button
@@ -78,10 +78,11 @@
 
   <ejs-grid
     #teamGrid
-    [dataSource]="teams"
+     [dataSource]="gridData"
     [allowSorting]="true"
     [allowPaging]="true"
     [pageSettings]="pageSettings"
+     (dataStateChange)="onGridDataStateChange($event)"
     [enableHover]="true"
     gridLines="Horizontal"
     width="100%">
@@ -193,7 +194,7 @@
 
   <div class="grid-footer">
     <span>
-      Showing {{ teams.length }} loaded teams
+      Showing {{ totalVisibleTeams }} teams
     </span>
     <span>Marketing Team Master</span>
   </div>

@@ -82,7 +82,7 @@
   </ejs-dropdownlist>
 
   <span class="count">
-    {{ salesmen.length }} records
+    {{ totalSalesmen }} records
   </span>
 
 </div>
@@ -103,10 +103,11 @@
 
     <ejs-grid
       #salesmenGrid
-      [dataSource]="salesmen"
+       [dataSource]="gridData"
       [allowSorting]="true"
       [allowPaging]="true"
       [pageSettings]="pageSettings"
+       (dataStateChange)="onGridDataStateChange($event)"
       gridLines="Horizontal">
 
       <!-- ======================================

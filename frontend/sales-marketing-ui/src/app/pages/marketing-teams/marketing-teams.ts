@@ -969,6 +969,8 @@ export class MarketingTeams implements OnInit, OnDestroy {
   editDialog?: DialogComponent;
 
   teams: MarketingTeamListItem[] = [];
+  gridData = { result: this.teams, count: 0 };
+  totalVisibleTeams = 0;
   availableSalesmen: Salesman[] = [];
 
   readonly roles = SALESMAN_ROLES;
@@ -1176,8 +1178,6 @@ onStatusChange(value: number | string | null | undefined): void {
   this.selectedStatus =
     status === 1 || status === 2 ? status : null;
 
-  console.log('STATUS STATE:', this.selectedStatus);
-
   this.load();
 }
 
@@ -1199,12 +1199,7 @@ onStatusChange(value: number | string | null | undefined): void {
   }
 
   
-load(): void {
-  console.log('LOAD CALLED:', {
-    search: this.search,
-    status: this.selectedStatus
-  });
-
+load(requestedPage = 1, requestedPageSize = this.pageSettings.pageSize): void {
   // Cancel the previous API request.
   this.listSub?.unsubscribe();
 
@@ -1213,33 +1208,27 @@ load(): void {
   const query = {
     search: this.search.trim(),
     status: this.selectedStatus ?? undefined,
-    page: 1,
-    pageSize: 100
+    page: requestedPage,
+    pageSize: requestedPageSize
   };
-
-  console.log('API REQUEST PARAMETERS:', query);
 
   this.listSub = this.api.getTeams(query).subscribe({
     next: response => {
-  console.log('API ITEMS:', response.items);
-
   this.teams = [...response.items];
+  this.totalVisibleTeams = response.totalCount;
+  this.gridData = {
+    result: this.teams,
+    count: response.totalCount
+  };
   this.loading = false;
 
   // Update Angular bindings first.
   this.cdr.detectChanges();
 
-  // Return to the first page after filtering.
-  if (this.teamGrid) {
-    this.teamGrid.goToPage(1);
-  }
-
   this.cdr.detectChanges();
 },
 
     error: error => {
-      console.error('MARKETING TEAM API ERROR:', error);
-
       this.loading = false;
       this.teams = [];
 
@@ -1252,6 +1241,13 @@ load(): void {
     }
   });
 }
+
+  onGridDataStateChange(event: { skip?: number; take?: number }): void {
+    const pageSize = event.take ?? this.pageSettings.pageSize ?? 10;
+    const page = Math.floor((event.skip ?? 0) / pageSize) + 1;
+
+    this.load(page, pageSize);
+  }
 
   // ==============================
   // VIEW TEAM

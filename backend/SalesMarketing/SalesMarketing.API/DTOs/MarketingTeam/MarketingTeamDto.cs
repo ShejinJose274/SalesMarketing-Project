@@ -11,8 +11,10 @@ public class MarketingTeamDto
     [Required, StringLength(100)]
     public string Teamname { get; set; } = string.Empty;
 
+    [Range(1, long.MaxValue)]
     public long Teamleaderid { get; set; }
 
+    [StringLength(500)]
     public string? Description { get; set; }
 
     public List<MarketingTeamMemberDto> Members { get; set; } = new();

@@ -232,7 +232,7 @@ public class MarketingTeamService
             Teamcode = dto.Teamcode.Trim().ToUpperInvariant(),
             Teamname = dto.Teamname.Trim(),
             Teamleaderid = dto.Teamleaderid,
-            Description = dto.Description,
+            Description = NormalizeOptional(dto.Description),
             Status = dto.Status,
             Createddate = DateTime.UtcNow
         };
@@ -413,10 +413,15 @@ public class MarketingTeamService
         await using var transaction =
             await _db.Database.BeginTransactionAsync();
 
-        team.Teamcode = dto.Teamcode.Trim().ToUpperInvariant();
+        var requestedCode = dto.Teamcode.Trim().ToUpperInvariant();
+        if (!string.Equals(requestedCode, team.Teamcode, StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException(
+                "Team code cannot be changed after creation.");
+        }
         team.Teamname = dto.Teamname.Trim();
         team.Teamleaderid = dto.Teamleaderid;
-        team.Description = dto.Description;
+        team.Description = NormalizeOptional(dto.Description);
         team.Status = dto.Status;
         team.Modifieddate = DateTime.UtcNow;
 
@@ -469,86 +474,11 @@ public class MarketingTeamService
         return true;
     }
 
-    // ACTIVATE OR DEACTIVATE TEAM
-    //public async Task<bool> ChangeStatusAsync(long id, short status)
-    //{
-    //    if (status != 1 && status != 2)
-    //    {
-    //        throw new ArgumentException(
-    //            "Status must be 1 (Active) or 2 (Inactive).");
-    //    }
-
-    //    var team = await _db.Marketingteams
-    //        .Include(x => x.Marketingteamdetails)
-    //        .FirstOrDefaultAsync(x => x.Id == id);
-
-
-    //    if (team.Status == (short)MarketingTeamStatus.Deleted)
-    //    {
-    //        throw new InvalidOperationException(
-    //            "Cannot activate or deactivate a deleted marketing team.");
-    //    }
-
-
-    //    if (status == 1)
-    //    {
-    //        // Team must have a valid active leader
-    //        var leader = team.Marketingteamdetails
-    //            .FirstOrDefault(x =>
-    //                x.Salesmanid == team.Teamleaderid &&
-    //                x.Role == 1);
-
-    //        if (leader == null)
-    //        {
-    //            throw new InvalidOperationException(
-    //                "Team must have a valid leader.");
-    //        }
-
-    //        bool available = !await _db.Marketingteamdetails
-    //            .AnyAsync(x =>
-    //                x.Salesmanid == team.Teamleaderid &&
-    //                x.Marketingteamid != id &&
-    //                x.Status == 1);
-
-    //        bool leaderActive = await _db.Salesmen
-    //            .AnyAsync(x =>
-    //                x.Id == team.Teamleaderid &&
-    //                x.Status == 1);
-
-    //        if (!available || !leaderActive)
-    //        {
-    //            throw new InvalidOperationException(
-    //                "Team leader is not available.");
-    //        }
-
-    //        // Only the leader is reactivated automatically.
-    //        foreach (var member in team.Marketingteamdetails)
-    //        {
-    //            member.Status =
-    //                member.Salesmanid == team.Teamleaderid
-    //                    ? (short)1
-    //                    : (short)2;
-    //        }
-    //    }
-    //    else
-    //    {
-    //        // Deactivate all members
-    //        foreach (var member in team.Marketingteamdetails)
-    //        {
-    //            member.Status = 2;
-    //        }
-    //    }
-
-    //    team.Status = status;
-    //    team.Modifieddate = DateTime.UtcNow;
-
-    //    await _db.SaveChangesAsync();
-
-    //    return true;
-    //}
-
-
-
+    private static string? NormalizeOptional(string? value)
+    {
+        var normalized = value?.Trim();
+        return string.IsNullOrWhiteSpace(normalized) ? null : normalized;
+    }
 
     public async Task<bool> ChangeStatusAsync(
         long id,

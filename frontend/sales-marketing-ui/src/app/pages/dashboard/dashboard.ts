@@ -36,6 +36,10 @@ export class Dashboard implements OnInit {
   // Dashboard data
   salesmen: Salesman[] = [];
   teams: MarketingTeamListItem[] = [];
+  totalSalesmen = 0;
+  activeSalesmanCount = 0;
+  inactiveSalesmanCount = 0;
+  totalTeams = 0;
 
   // UI state
   loading = true;
@@ -43,14 +47,10 @@ export class Dashboard implements OnInit {
 
   // Load dashboard data
   ngOnInit() {
-    this.api.getSalesmen({ pageSize: 100 }).subscribe({
+    this.api.getSalesmen({ pageSize: 1 }).subscribe({
       next: (response) => {
-        this.salesmen = response.items;
-
-        // Load marketing teams if user is MasterAdmin
-        this.loadTeams();
-
-        // Update dashboard immediately
+        this.totalSalesmen = response.totalCount;
+        this.loadSalesmanPreview();
         this.cdr.detectChanges();
       },
 
@@ -59,6 +59,22 @@ export class Dashboard implements OnInit {
         this.loading = false;
 
         // Update error message immediately
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  private loadSalesmanPreview(): void {
+    this.api.getSalesmen({ page: 1, pageSize: 100 }).subscribe({
+      next: (response) => {
+        this.salesmen = response.items.slice(0, 6);
+        this.activeSalesmanCount = response.items.filter(person => person.status === 1).length;
+        this.inactiveSalesmanCount = response.items.filter(person => person.status === 2).length;
+        this.loadTeams();
+      },
+      error: (error) => {
+        this.error = this.api.errorMessage(error);
+        this.loading = false;
         this.cdr.detectChanges();
       }
     });
@@ -75,9 +91,10 @@ export class Dashboard implements OnInit {
       return;
     }
 
-    this.api.getTeams({ pageSize: 100 }).subscribe({
+    this.api.getTeams({ pageSize: 6 }).subscribe({
       next: (response) => {
         this.teams = response.items;
+        this.totalTeams = response.totalCount;
         this.loading = false;
 
         // Update dashboard after teams load
@@ -96,15 +113,11 @@ export class Dashboard implements OnInit {
 
   // Dashboard statistics
   get activeSalesmen() {
-    return this.salesmen.filter(
-      x => x.status === 1
-    ).length;
+    return this.activeSalesmanCount;
   }
 
   get inactiveSalesmen() {
-    return this.salesmen.filter(
-      x => x.status === 2
-    ).length;
+    return this.inactiveSalesmanCount;
   }
 
   get activeTeams() {
